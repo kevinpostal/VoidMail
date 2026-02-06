@@ -1,0 +1,2 @@
+# VoidMail
+Temporary Email Service
