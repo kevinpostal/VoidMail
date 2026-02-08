@@ -101,6 +101,7 @@ main {
     min-width: 0;
     outline: none;
     transition: border-color 0.15s;
+    align-self: stretch;
 }
 
 .name-input:focus {
@@ -110,19 +111,18 @@ main {
 .at-sign {
     font-family: var(--mono);
     font-size: 1.15rem;
-    color: var(--accent);
-    background: linear-gradient(180deg, rgba(0, 255, 136, 0.08) 0%, rgba(0, 255, 136, 0.02) 100%);
+    color: var(--text-dim);
+    background: var(--bg);
     border: 1px solid var(--border);
     border-left: none;
     border-right: none;
-    padding: 0.6rem 0.5rem;
-    user-select: none;
+    padding: 0.6rem 0.3rem;
+    line-height: normal;
+    height: auto;
+    align-self: stretch;
     display: flex;
     align-items: center;
-    justify-content: center;
-    text-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    user-select: none;
 }
 
 .address-bar .domain-select {
@@ -138,6 +138,7 @@ main {
     outline: none;
     transition: border-color 0.15s;
     width: auto;
+    align-self: stretch;
 }
 
 .address-bar .domain-select:focus {
