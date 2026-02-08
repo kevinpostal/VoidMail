@@ -80,14 +80,42 @@ function copyAddress() {
     
     const addr = name + "@" + domainText;
     
-    navigator.clipboard.writeText(addr).then(() => {
-        const el = document.getElementById("copy-text");
-        el.textContent = "Copied!";
-        setTimeout(() => el.textContent = "Copy", 1500);
-    }).catch(err => {
+    // Try modern clipboard API first (requires HTTPS)
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(addr).then(() => {
+            showCopySuccess();
+        }).catch(() => {
+            fallbackCopy(addr);
+        });
+    } else {
+        fallbackCopy(addr);
+    }
+}
+
+function fallbackCopy(text) {
+    // Create temporary textarea for older browsers/HTTP
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.select();
+    
+    try {
+        document.execCommand("copy");
+        showCopySuccess();
+    } catch (err) {
         console.error("Copy failed:", err);
-        alert("Failed to copy: " + addr);
-    });
+        alert("Copy manually: " + text);
+    }
+    
+    document.body.removeChild(textarea);
+}
+
+function showCopySuccess() {
+    const el = document.getElementById("copy-text");
+    el.textContent = "Copied!";
+    setTimeout(() => el.textContent = "Copy", 1500);
 }
 
 function randomName() {
