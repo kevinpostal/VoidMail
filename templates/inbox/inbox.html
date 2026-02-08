@@ -71,14 +71,18 @@
 {% block scripts %}
 <script>
 function copyAddress() {
-    const name = document.getElementById("name-input").value;
-    const domain = document.getElementById("domain-select");
-    const domainText = domain.options[domain.selectedIndex].text;
+    const name = document.getElementById("name-input").value.trim();
+    const domainSelect = document.getElementById("domain-select");
+    const selectedOption = domainSelect.options[domainSelect.selectedIndex];
+    const domainText = selectedOption.textContent.trim();
     const addr = name + "@" + domainText;
     navigator.clipboard.writeText(addr).then(() => {
         const el = document.getElementById("copy-text");
         el.textContent = "Copied!";
         setTimeout(() => el.textContent = "Copy", 1500);
+    }).catch(err => {
+        console.error("Copy failed:", err);
+        alert("Failed to copy: " + addr);
     });
 }
 
