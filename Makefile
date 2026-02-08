@@ -61,13 +61,13 @@ build:
 	podman compose build
 
 up:
-	# Ensure external volume exists before starting (prevents accidental data loss)
-	podman volume exists voidmail_pgdata || podman volume create voidmail_pgdata
 	podman compose up -d
 
 create-volume:
 	podman volume exists voidmail_pgdata || podman volume create voidmail_pgdata
 	@echo "Volume voidmail_pgdata is ready"
+
+# For first-time setup, run: make create-volume && make up
 
 down:
 	podman compose down 2>/dev/null || true
@@ -82,11 +82,11 @@ reset-everything:
 	@read confirm && [ "$$confirm" = "yes" ] && podman compose down -v || echo "Aborted"
 
 backup-db:
-	podman exec voidmail_db_1 pg_dump -U voidmail voidmail > backup_$$(date +%Y%m%d_%H%M%S).sql
+	podman exec voidmail-db-1 pg_dump -U voidmail voidmail > backup_$$(date +%Y%m%d_%H%M%S).sql
 
 restore-db:
 	@echo "Usage: make restore-db FILE=backup_YYYYMMDD_HHMMSS.sql"
-	[ -n "$(FILE)" ] && podman exec -i voidmail_db_1 psql -U voidmail voidmail < $(FILE)
+	[ -n "$(FILE)" ] && podman exec -i voidmail-db-1 psql -U voidmail voidmail < $(FILE)
 
 quickdev: install migrate run
 
