@@ -26,8 +26,11 @@ help:
 	@echo ""
 	@echo "  Containers:"
 	@echo "    make build           Build Podman containers"
-	@echo "    make up              Start containers"
+	@echo "    make up              Start containers (creates volume if needed)"
 	@echo "    make down            Stop containers"
+	@echo "    make create-volume   Create the database volume manually"
+	@echo "    make backup-db       Backup database to SQL file"
+	@echo "    make restore-db      Restore database from SQL file"
 	@echo ""
 	@echo "  Maintenance:"
 	@echo "    make cleanup         Run cleanup task (remove expired mailboxes)"
@@ -58,10 +61,32 @@ build:
 	podman compose build
 
 up:
+	# Ensure external volume exists before starting (prevents accidental data loss)
+	podman volume exists voidmail_pgdata || podman volume create voidmail_pgdata
 	podman compose up -d
+
+create-volume:
+	podman volume exists voidmail_pgdata || podman volume create voidmail_pgdata
+	@echo "Volume voidmail_pgdata is ready"
 
 down:
 	podman compose down 2>/dev/null || true
+
+# NEVER use -v flag with down - it removes all volumes and data!
+# The volume is now marked as 'external' in compose.yaml to prevent deletion.
+
+# WARNING: This will DESTROY ALL DATA including the database volume
+reset-everything:
+	@echo "WARNING: This will DELETE ALL DATA including the database volume!"
+	@echo "Are you sure? Type 'yes' to continue: "
+	@read confirm && [ "$$confirm" = "yes" ] && podman compose down -v || echo "Aborted"
+
+backup-db:
+	podman exec voidmail_db_1 pg_dump -U voidmail voidmail > backup_$$(date +%Y%m%d_%H%M%S).sql
+
+restore-db:
+	@echo "Usage: make restore-db FILE=backup_YYYYMMDD_HHMMSS.sql"
+	[ -n "$(FILE)" ] && podman exec -i voidmail_db_1 psql -U voidmail voidmail < $(FILE)
 
 quickdev: install migrate run
 
