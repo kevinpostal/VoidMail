@@ -3,9 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}VoidMail{% endblock %}</title>
+    <title>{% block title %}VoidMail — Disposable Email{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Free disposable email addresses. No signup, no tracking, instant privacy.{% endblock %}">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{% block og_url %}https://voidmail.local{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}VoidMail — Disposable Email{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Free disposable email addresses. No signup, no tracking, instant privacy.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% static 'favicon.ico' %}{% endblock %}">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:url" content="{% block twitter_url %}https://voidmail.local{% endblock %}">
+    <meta property="twitter:title" content="{% block twitter_title %}VoidMail — Disposable Email{% endblock %}">
+    <meta property="twitter:description" content="{% block twitter_description %}Free disposable email addresses. No signup, no tracking, instant privacy.{% endblock %}">
+    <meta property="twitter:image" content="{% block twitter_image %}{% static 'favicon.ico' %}{% endblock %}">
+    
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    {% block extra_meta %}{% endblock %}
 </head>
 <body>
     <header>
