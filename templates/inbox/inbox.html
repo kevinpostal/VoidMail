@@ -71,11 +71,15 @@
 {% block scripts %}
 <script>
 function copyAddress() {
-    const name = document.getElementById("name-input").value.trim();
+    const nameInput = document.getElementById("name-input");
     const domainSelect = document.getElementById("domain-select");
+    
+    const name = nameInput.value.trim().toLowerCase();
     const selectedOption = domainSelect.options[domainSelect.selectedIndex];
-    const domainText = selectedOption.textContent.trim();
+    const domainText = selectedOption.text.toLowerCase();
+    
     const addr = name + "@" + domainText;
+    
     navigator.clipboard.writeText(addr).then(() => {
         const el = document.getElementById("copy-text");
         el.textContent = "Copied!";
