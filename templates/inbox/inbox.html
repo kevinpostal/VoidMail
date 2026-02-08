@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}{{ mailbox.address }} — VoidMail{% endblock %}
+
+{% block content %}
+<section class="address-editor">
+    <h1 class="editor-title">Your Temporary Email</h1>
+    <form method="post" action="{% url 'inbox:create_mailbox' %}" class="address-form" id="address-form">
+        {% csrf_token %}
+        <div class="address-bar">
+            <input
+                type="text"
+                name="name"
+                id="name-input"
+                value="{{ local_part }}"
+                class="name-input"
+                autocomplete="off"
+                spellcheck="false"
+            >
+            <span class="at-sign">@</span>
+            <select name="domain" id="domain-select" class="domain-select" onchange="document.getElementById('address-form').submit()">
+                {% for d in domains %}
+                <option value="{{ d.id }}" {% if d.id == mailbox.domain_id %}selected{% endif %}>{{ d.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="address-actions">
+            <button type="button" class="btn-icon" id="copy-btn" onclick="copyAddress()" title="Copy address">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="5.5" y="5.5" width="8" height="8" rx="1"/>
+                    <path d="M10.5 5.5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/>
+                </svg>
+                <span id="copy-text">Copy</span>
+            </button>
+            <button type="button" class="btn-icon" id="random-btn" onclick="randomName()" title="Generate random name">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="2" y="2" width="12" height="12" rx="2"/>
+                    <circle cx="5.5" cy="5.5" r="1" fill="currentColor" stroke="none"/>
+                    <circle cx="10.5" cy="5.5" r="1" fill="currentColor" stroke="none"/>
+                    <circle cx="5.5" cy="10.5" r="1" fill="currentColor" stroke="none"/>
+                    <circle cx="10.5" cy="10.5" r="1" fill="currentColor" stroke="none"/>
+                    <circle cx="8" cy="8" r="1" fill="currentColor" stroke="none"/>
+                </svg>
+                Random
+            </button>
+            <button type="submit" class="btn-go" title="Use this address">Go</button>
+        </div>
+    </form>
+    <div class="address-meta">
+        <span class="countdown" id="countdown" data-seconds="{{ remaining_seconds }}"></span>
+    </div>
+</section>
+
+<section class="email-list" id="email-list">
+    {% if emails %}
+        {% for email in emails %}
+        <a href="{% url 'inbox:email_detail' pk=email.pk %}" class="email-row">
+            <span class="email-sender">{{ email.sender }}</span>
+            <span class="email-subject">{{ email.subject }}</span>
+            <span class="email-time">{{ email.received_at|timesince }} ago</span>
+        </a>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state" id="empty-state">
+            <p>Waiting for emails&hellip;</p>
+            <p class="hint">Send mail to <code>{{ mailbox.address }}</code></p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyAddress() {
+    const name = document.getElementById("name-input").value;
+    const domain = document.getElementById("domain-select");
+    const domainText = domain.options[domain.selectedIndex].text;
+    const addr = name + "@" + domainText;
+    navigator.clipboard.writeText(addr).then(() => {
+        const el = document.getElementById("copy-text");
+        el.textContent = "Copied!";
+        setTimeout(() => el.textContent = "Copy", 1500);
+    });
+}
+
+function randomName() {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let name = "";
+    for (let i = 0; i < 10; i++) {
+        name += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    document.getElementById("name-input").value = name;
+    document.getElementById("address-form").submit();
+}
+
+// Countdown timer
+(function() {
+    const el = document.getElementById("countdown");
+    let secs = parseInt(el.dataset.seconds, 10);
+    function update() {
+        if (secs <= 0) {
+            el.textContent = "Expired";
+            el.classList.add("expired");
+            return;
+        }
+        const m = Math.floor(secs / 60);
+        const s = secs % 60;
+        el.textContent = m + ":" + String(s).padStart(2, "0") + " remaining";
+        secs--;
+        setTimeout(update, 1000);
+    }
+    update();
+})();
+
+// Poll for new emails every 5 seconds
+(function() {
+    const checkUrl = "{% url 'inbox:check_emails' token=mailbox.token %}";
+    let knownCount = {{ emails|length }};
+
+    setInterval(async () => {
+        try {
+            const res = await fetch(checkUrl);
+            const data = await res.json();
+            if (data.expired) {
+                document.getElementById("countdown").textContent = "Expired";
+                return;
+            }
+            if (data.count > knownCount) {
+                location.reload();
+            }
+        } catch (e) {}
+    }, 5000);
+})();
+</script>
+{% endblock %}

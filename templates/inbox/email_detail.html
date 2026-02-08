@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ email.subject }} — VoidMail{% endblock %}
+
+{% block content %}
+<section class="email-detail">
+    <a href="{% url 'inbox:inbox_view' token=mailbox.token %}" class="back-link">&larr; Back to inbox</a>
+
+    <div class="email-header">
+        <h2>{{ email.subject }}</h2>
+        <div class="email-meta">
+            <span><strong>From:</strong> {{ email.sender }}</span>
+            <span><strong>To:</strong> {{ email.recipient }}</span>
+            <span><strong>Received:</strong> {{ email.received_at }}</span>
+            <span><strong>Size:</strong> {{ email.size_bytes|filesizeformat }}</span>
+        </div>
+    </div>
+
+    <div class="email-body">
+        {% if email.body_html %}
+            <iframe sandbox="" srcdoc="{{ email.body_html }}" class="html-frame"></iframe>
+        {% else %}
+            <pre class="text-body">{{ email.body_text }}</pre>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,76 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: voidmail
+      POSTGRES_USER: voidmail
+      POSTGRES_PASSWORD: voidmail
+    ports:
+      - "5435:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voidmail"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Containerfile
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             granian config.asgi:application --interface asgi --host 0.0.0.0 --port 8000"
+    ports:
+      - "8005:8000"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://voidmail:voidmail@db:5432/voidmail
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  smtp:
+    build:
+      context: .
+      dockerfile: Containerfile
+    command: python manage.py smtpserver --host 0.0.0.0 --port 2525
+    ports:
+      - "25:2525"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://voidmail:voidmail@db:5432/voidmail
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+
+  cleanup:
+    build:
+      context: .
+      dockerfile: Containerfile
+    command: python manage.py cleanup --interval 60
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://voidmail:voidmail@db:5432/voidmail
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
