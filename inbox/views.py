@@ -8,7 +8,7 @@ from .models import Domain, Email, Mailbox
 
 def home(request):
     """Auto-create a mailbox and redirect to inbox — tempmail-style instant start."""
-    domain = Domain.objects.filter(is_active=True).first()
+    domain = Domain.objects.filter(is_active=True, is_default=True).first() or Domain.objects.filter(is_active=True).first()
     mailbox = Mailbox.objects.create(domain=domain)
     return redirect("inbox:inbox_view", token=mailbox.token)
 
@@ -23,7 +23,7 @@ def create_mailbox(request):
     if domain_id:
         domain = get_object_or_404(Domain, id=domain_id, is_active=True)
     else:
-        domain = Domain.objects.filter(is_active=True).first()
+        domain = Domain.objects.filter(is_active=True, is_default=True).first() or Domain.objects.filter(is_active=True).first()
 
     if name:
         address = f"{name}@{domain.name}"
@@ -101,7 +101,8 @@ def new_mailbox(request):
         domain = get_object_or_404(Domain, id=domain_id, is_active=True)
         mailbox = Mailbox.objects.create(domain=domain)
     else:
-        mailbox = Mailbox.objects.create()
+        domain = Domain.objects.filter(is_active=True, is_default=True).first() or Domain.objects.filter(is_active=True).first()
+        mailbox = Mailbox.objects.create(domain=domain)
     return redirect("inbox:inbox_view", token=mailbox.token)
 
 

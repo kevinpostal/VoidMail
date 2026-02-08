@@ -5,8 +5,8 @@ from .models import Domain, Email, Mailbox
 
 @admin.register(Domain)
 class DomainAdmin(admin.ModelAdmin):
-    list_display = ("name", "is_active", "created_at")
-    list_filter = ("is_active", "created_at")
+    list_display = ("name", "is_active", "is_default", "created_at")
+    list_filter = ("is_active", "is_default", "created_at")
     search_fields = ("name",)
 
 

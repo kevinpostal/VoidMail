@@ -26,6 +26,7 @@ class Domain(models.Model):
 
     name = models.CharField(max_length=253, unique=True, help_text="Domain name (e.g., voidmail.local)")
     is_active = models.BooleanField(default=True)
+    is_default = models.BooleanField(default=False, help_text="Default domain selected in dropdown (only one domain can be default)")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -33,6 +34,12 @@ class Domain(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        # Ensure only one domain is marked as default
+        if self.is_default:
+            Domain.objects.filter(is_default=True).update(is_default=False)
+        super().save(*args, **kwargs)
 
 
 class Mailbox(models.Model):
