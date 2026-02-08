@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: voidmail
       POSTGRES_PASSWORD: voidmail
     ports:
-      - "5436:5432"
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -18,7 +18,7 @@ services:
   redis:
     image: docker.io/library/redis:7-alpine
     ports:
-      - "6381:6379"
+      - "${REDIS_HOST_PORT:-6379}:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -33,7 +33,7 @@ services:
       sh -c "python manage.py migrate --noinput &&
              granian config.asgi:application --interface asgi --host 0.0.0.0 --port 8000"
     ports:
-      - "8005:8000"
+      - "${WEB_HOST_PORT:-8000}:8000"
     env_file: .env
     environment:
       DATABASE_URL: postgres://voidmail:voidmail@db:5432/voidmail
@@ -50,7 +50,7 @@ services:
       dockerfile: Containerfile
     command: python manage.py smtpserver --host 0.0.0.0 --port 2525
     ports:
-      - "25:2525"
+      - "${SMTP_HOST_PORT:-2525}:2525"
     env_file: .env
     environment:
       DATABASE_URL: postgres://voidmail:voidmail@db:5432/voidmail
