@@ -44,7 +44,7 @@ def create_mailbox(request):
 def inbox_view(request, token):
     """Display the inbox for a mailbox."""
     mailbox = get_object_or_404(Mailbox, token=token)
-    emails = mailbox.emails.all()
+    emails = mailbox.emails.filter(is_deleted=False)
     now = timezone.now()
     remaining = max(0, int((mailbox.expires_at - now).total_seconds()))
 
@@ -69,7 +69,7 @@ def check_emails(request, token):
         return JsonResponse({"expired": True, "emails": []})
 
     since = request.GET.get("since")
-    emails = mailbox.emails.all()
+    emails = mailbox.emails.filter(is_deleted=False)
     if since:
         try:
             from datetime import datetime
@@ -107,7 +107,7 @@ def new_mailbox(request):
 
 def email_detail(request, pk):
     """View a single email."""
-    email = get_object_or_404(Email, pk=pk)
+    email = get_object_or_404(Email, pk=pk, is_deleted=False)
     mailbox = email.mailbox
     return render(request, "inbox/email_detail.html", {
         "email": email,
@@ -117,10 +117,11 @@ def email_detail(request, pk):
 
 @require_POST
 def delete_email(request, pk):
-    """Delete a single email and redirect back to inbox."""
+    """Soft delete a single email (mark as hidden) and redirect back to inbox."""
     email = get_object_or_404(Email, pk=pk)
     mailbox = email.mailbox
-    email.delete()
+    email.is_deleted = True
+    email.save()
     return redirect("inbox:inbox_view", token=mailbox.token)
 
 

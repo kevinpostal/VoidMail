@@ -81,6 +81,7 @@ class Email(models.Model):
     body_html = models.TextField(blank=True, default="")
     received_at = models.DateTimeField(auto_now_add=True)
     size_bytes = models.PositiveIntegerField(default=0)
+    is_deleted = models.BooleanField(default=False, help_text="Soft delete - hidden from UI but kept in database")
 
     class Meta:
         ordering = ["-received_at"]
