@@ -61,7 +61,7 @@ up:
 	podman compose up -d
 
 down:
-	podman compose down
+	podman compose down 2>/dev/null || true
 
 quickdev: install migrate run
 
