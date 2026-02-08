@@ -10,6 +10,7 @@ urlpatterns = [
     path("inbox/<str:token>/", views.inbox_view, name="inbox_view"),
     path("inbox/<str:token>/check/", views.check_emails, name="check_emails"),
     path("email/<int:pk>/", views.email_detail, name="email_detail"),
+    path("email/<int:pk>/delete/", views.delete_email, name="delete_email"),
     path("new/", views.new_mailbox, name="new_mailbox"),
     path("health/", views.health_check, name="health_check"),
 ]

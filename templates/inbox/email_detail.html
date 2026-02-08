@@ -3,7 +3,18 @@
 
 {% block content %}
 <section class="email-detail">
-    <a href="{% url 'inbox:inbox_view' token=mailbox.token %}" class="back-link">&larr; Back to inbox</a>
+    <div class="email-actions">
+        <a href="{% url 'inbox:inbox_view' token=mailbox.token %}" class="back-link">&larr; Back to inbox</a>
+        <form method="post" action="{% url 'inbox:delete_email' pk=email.id %}" class="delete-form">
+            {% csrf_token %}
+            <button type="submit" class="btn-delete" onclick="return confirm('Delete this email?')">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M2 4h12M5 4V2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m3 0v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4h12"/>
+                </svg>
+                Delete
+            </button>
+        </form>
+    </div>
 
     <div class="email-header">
         <h2>{{ email.subject }}</h2>

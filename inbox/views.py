@@ -115,6 +115,15 @@ def email_detail(request, pk):
     })
 
 
+@require_POST
+def delete_email(request, pk):
+    """Delete a single email and redirect back to inbox."""
+    email = get_object_or_404(Email, pk=pk)
+    mailbox = email.mailbox
+    email.delete()
+    return redirect("inbox:inbox_view", token=mailbox.token)
+
+
 def health_check(request):
     """Health check endpoint."""
     return JsonResponse({"status": "ok"})

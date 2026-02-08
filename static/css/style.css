@@ -302,6 +302,36 @@ button:hover,
     text-decoration: underline;
 }
 
+.email-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.delete-form {
+    margin: 0;
+}
+
+.btn-delete {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--danger);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--danger);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.btn-delete:hover {
+    background: var(--danger);
+    color: var(--bg);
+}
+
 .email-header h2 {
     font-size: 1.3rem;
     margin-bottom: 0.75rem;
