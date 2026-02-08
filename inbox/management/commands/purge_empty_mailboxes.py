@@ -3,7 +3,7 @@
 from datetime import timedelta
 
 from django.core.management.base import BaseCommand
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils import timezone
 
 from inbox.models import Mailbox
@@ -28,12 +28,12 @@ class Command(BaseCommand):
         
         cutoff_time = timezone.now() - timedelta(hours=hours)
         
-        # Find mailboxes older than cutoff with no emails
+        # Find mailboxes older than cutoff with no non-deleted emails
         empty_mailboxes = Mailbox.objects.annotate(
-            email_count=Count("emails")
+            active_email_count=Count("emails", filter=Q(emails__is_deleted=False))
         ).filter(
             created_at__lte=cutoff_time,
-            email_count=0
+            active_email_count=0
         )
         
         count = empty_mailboxes.count()
