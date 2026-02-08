@@ -1,4 +1,4 @@
-.PHONY: help install run smtp cleanup build up down quickdev migrate makemigrations adddomain listdomains superuser
+.PHONY: help install run smtp cleanup purge-empty purge-empty-dry build up down quickdev migrate makemigrations adddomain listdomains superuser
 
 TO ?= test@voidmail.local
 FROM ?= sender@example.com
@@ -34,6 +34,8 @@ help:
 	@echo ""
 	@echo "  Maintenance:"
 	@echo "    make cleanup         Run cleanup task (remove expired mailboxes)"
+	@echo "    make purge-empty     Purge empty mailboxes older than 1 hour"
+	@echo "    make purge-empty-dry Preview empty mailboxes to be purged"
 	@echo "    make superuser       Create Django superuser account"
 
 install:
@@ -47,6 +49,12 @@ smtp:
 
 cleanup:
 	uv run python manage.py cleanup --once
+
+purge-empty:
+	uv run python manage.py purge_empty_mailboxes
+
+purge-empty-dry:
+	uv run python manage.py purge_empty_mailboxes --dry-run
 
 migrate:
 	uv run python manage.py migrate

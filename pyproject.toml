@@ -12,6 +12,7 @@ dependencies = [
     "whitenoise",
     "aiosmtpd",
     "pillow>=12.1.0",
+    "django-scheduled-tasks",
 ]
 
 [dependency-groups]

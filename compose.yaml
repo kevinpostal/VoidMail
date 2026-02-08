@@ -72,6 +72,21 @@ services:
       db:
         condition: service_healthy
 
+  scheduler:
+    build:
+      context: .
+      dockerfile: Containerfile
+    command: python manage.py run_task_scheduler
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://voidmail:voidmail@db:5432/voidmail
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 volumes:
   voidmail_pgdata:
     external: true
